@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasir Aksesoris HP</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= LOGIN PAGE ================= -->
+<div id="page-login" class="page active">
+  <div class="login-box">
+    <div class="login-logo">📱</div>
+    <h1>Kasir Aksesoris HP</h1>
+    <p class="muted">Masuk untuk melanjutkan</p>
+    <form id="form-login">
+      <label>Username</label>
+      <input type="text" id="login-username" placeholder="admin / kasir" required autocomplete="username">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+      <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+    </form>
+    <div id="login-error" class="error-msg"></div>
+    <div class="login-hint">
+      <strong>Demo Akun</strong><br>
+      Admin: <code>admin</code> / <code>admin123</code><br>
+      Kasir: <code>kasir</code> / <code>kasir123</code>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MAIN APP ================= -->
+<div id="page-app" class="page">
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-icon">📱</span>
+        <span class="sidebar-logo-text">AksesorisPOS</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="pos">
+          <span class="nav-icon">🛒</span> Kasir (POS)
+        </button>
+        <button class="nav-item" data-view="history">
+          <span class="nav-icon">🧾</span> Riwayat Penjualan
+        </button>
+        <button class="nav-item admin-only" data-view="inventory">
+          <span class="nav-icon">📦</span> Inventaris
+        </button>
+        <button class="nav-item admin-only" data-view="reports">
+          <span class="nav-icon">📊</span> Laporan &amp; Analitik
+        </button>
+        <button class="nav-item admin-only" data-view="settings">
+          <span class="nav-icon">⚙️</span> Pengaturan Toko
+        </button>
+        <button class="nav-item admin-only" data-view="users">
+          <span class="nav-icon">👤</span> Manajemen User
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sync-status" id="sync-status">
+          <span class="sync-dot online" id="sync-dot"></span>
+          <span id="sync-text">Online</span>
+        </div>
+        <div class="user-box">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">Admin</div>
+            <div class="user-role" id="user-role">Admin</div>
+          </div>
+          <button class="btn-logout" id="btn-logout" title="Keluar">⏻</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- ===== VIEW: POS ===== -->
+      <section id="view-pos" class="view active">
+        <div class="pos-layout">
+          <div class="pos-products">
+            <div class="view-header">
+              <h2>Transaksi Kasir</h2>
+              <div class="search-box">
+                <input type="text" id="pos-search" placeholder="Cari nama produk, kategori, atau tipe HP (misal: iPhone 11)...">
+              </div>
+            </div>
+            <div class="category-tabs" id="category-tabs"></div>
+            <div class="product-grid" id="product-grid"></div>
+          </div>
+
+          <div class="pos-cart">
+            <div class="cart-header">
+              <h3>🛒 Keranjang</h3>
+              <button class="btn btn-sm btn-ghost" id="btn-clear-cart">Kosongkan</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+              <div class="empty-state">Keranjang masih kosong</div>
+            </div>
+
+            <div class="cart-summary">
+              <div class="discount-row">
+                <label>Diskon Total</label>
+                <div class="discount-input-group">
+                  <input type="number" id="cart-discount-value" min="0" value="0">
+                  <select id="cart-discount-type">
+                    <option value="percent">%</option>
+                    <option value="amount">Rp</option>
+                  </select>
+                </div>
+              </div>
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="sum-subtotal">Rp 0</span>
+              </div>
+              <div class="summary-row">
+                <span>Diskon</span>
+                <span id="sum-discount">- Rp 0</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total</span>
+                <span id="sum-total">Rp 0</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-block btn-lg" id="btn-checkout">Bayar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VIEW: HISTORY ===== -->
+      <section id="view-history" class="view">
+        <div class="view-header">
+          <h2>Riwayat Penjualan</h2>
+          <div class="filter-row">
+            <input type="date" id="history-date-from">
+            <span>s/d</span>
+            <input type="date" id="history-date-to">
+            <button class="btn btn-secondary btn-sm" id="btn-history-filter">Filter</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No. Struk</th>
+                <th>Tanggal/Waktu</th>
+                <th>Kasir</th>
+                <th>Item</th>
+                <th>Total</th>
+                <th>Metode Bayar</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== VIEW: INVENTORY ===== -->
+      <section id="view-inventory" class="view">
+        <div class="view-header">
+          <h2>Manajemen Inventaris</h2>
+          <div class="header-actions">
+            <input type="text" id="inv-search" placeholder="Cari produk...">
+            <button class="btn btn-primary" id="btn-add-product">+ Tambah Produk</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th>Merek</th>
+                <th>Kompatibel HP</th>
+                <th>Harga Beli</th>
+                <th>Harga Jual</th>
+                <th>Stok</th>
+                <th>Min. Stok</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== VIEW: REPORTS ===== -->
+      <section id="view-reports" class="view">
+        <div class="view-header">
+          <h2>Laporan &amp; Analitik</h2>
+          <div class="header-actions">
+            <select id="report-period">
+              <option value="today">Hari Ini</option>
+              <option value="week">7 Hari Terakhir</option>
+              <option value="month">Bulan Ini</option>
+              <option value="custom">Kustom</option>
+            </select>
+            <input type="date" id="report-date-from" style="display:none">
+            <input type="date" id="report-date-to" style="display:none">
+            <button class="btn btn-secondary btn-sm" id="btn-export-csv">⬇ Export CSV</button>
+            <button class="btn btn-secondary btn-sm" id="btn-export-pdf">⬇ Export PDF</button>
+          </div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-label">Total Pendapatan</div>
+            <div class="stat-value" id="stat-revenue">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Jumlah Transaksi</div>
+            <div class="stat-value" id="stat-transactions">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Laba Bersih (Margin)</div>
+            <div class="stat-value" id="stat-profit">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Rata-rata / Transaksi</div>
+            <div class="stat-value" id="stat-avg">Rp 0</div>
+          </div>
+        </div>
+
+        <div class="report-grid">
+          <div class="card">
+            <h3>Pendapatan per Hari</h3>
+            <div id="chart-revenue" class="chart-area"></div>
+          </div>
+          <div class="card">
+            <h3>Produk Terlaris</h3>
+            <div id="chart-top-products" class="chart-area"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Produk Slow-Moving (Tidak Laku)</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Produk</th><th>Kategori</th><th>Stok Saat Ini</th><th>Terjual (periode ini)</th></tr></thead>
+              <tbody id="slowmoving-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VIEW: SETTINGS ===== -->
+      <section id="view-settings" class="view">
+        <div class="view-header"><h2>Pengaturan Toko</h2></div>
+        <div class="card form-card">
+          <label>Nama Toko</label>
+          <input type="text" id="set-store-name">
+          <label>Alamat Toko</label>
+          <textarea id="set-store-address" rows="2"></textarea>
+          <label>No. Telepon</label>
+          <input type="text" id="set-store-phone">
+          <label>Catatan Kaki Struk</label>
+          <textarea id="set-receipt-footer" rows="2"></textarea>
+          <label>Ukuran Printer Thermal</label>
+          <select id="set-printer-size">
+            <option value="58">58mm</option>
+            <option value="80">80mm</option>
+          </select>
+          <div class="checkbox-row">
+            <input type="checkbox" id="set-tax-enabled">
+            <label for="set-tax-enabled">Aktifkan Pajak</label>
+          </div>
+          <label>Persentase Pajak (%)</label>
+          <input type="number" id="set-tax-percent" min="0" max="100" step="0.1">
+          <label>Batas Minimum Stok Default</label>
+          <input type="number" id="set-min-stock" min="0">
+          <button class="btn btn-primary" id="btn-save-settings">Simpan Pengaturan</button>
+          <span id="settings-saved-msg" class="success-msg"></span>
+        </div>
+      </section>
+
+      <!-- ===== VIEW: USERS ===== -->
+      <section id="view-users" class="view">
+        <div class="view-header">
+          <h2>Manajemen User</h2>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="btn-add-user">+ Tambah User</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Username</th><th>Nama</th><th>Role</th><th>Aksi</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="modal-product">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="product-modal-title">Tambah Produk</h3>
+      <button class="modal-close" data-close="modal-product">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="prod-id">
+      <label>Nama Produk *</label>
+      <input type="text" id="prod-name" placeholder="Contoh: Casing Silicone Candy - Merah">
+      <div class="form-row">
+        <div>
+          <label>Kategori *</label>
+          <select id="prod-category">
+            <option>Casing</option>
+            <option>Charger</option>
+            <option>Audio</option>
+            <option>Tempered Glass</option>
+            <option>Kabel Data</option>
+            <option>Gantungan Kunci</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+        <div>
+          <label>Merek</label>
+          <input type="text" id="prod-brand" placeholder="Contoh: Generic, Anker, dll">
+        </div>
+      </div>
+      <label>Tipe HP Kompatibel (pisahkan dengan koma)</label>
+      <input type="text" id="prod-compat" placeholder="Contoh: iPhone 13, iPhone 13 Pro, iPhone 13 Pro Max">
+      <label>Varian Warna (pisahkan dengan koma, opsional)</label>
+      <input type="text" id="prod-variant" placeholder="Contoh: Merah, Biru, Hijau">
+      <div class="form-row">
+        <div>
+          <label>Harga Beli (Modal) *</label>
+          <input type="number" id="prod-cost" min="0">
+        </div>
+        <div>
+          <label>Harga Jual *</label>
+          <input type="number" id="prod-price" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Jumlah Stok *</label>
+          <input type="number" id="prod-stock" min="0">
+        </div>
+        <div>
+          <label>Batas Min. Stok (alert)</label>
+          <input type="number" id="prod-minstock" min="0" value="5">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-close="modal-product">Batal</button>
+      <button class="btn btn-primary" id="btn-save-product">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stock Adjustment Modal -->
+<div class="modal-overlay" id="modal-stock">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Update Stok</h3>
+      <button class="modal-close" data-close="modal-stock">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="stock-prod-id">
+      <p id="stock-prod-name" class="muted"></p>
+      <label>Stok Saat Ini</label>
+      <input type="text" id="stock-current" disabled>
+      <label>Jenis Penyesuaian</label>
+      <select id="stock-type">
+        <option value="in">Barang Masuk (+)</option>
+        <option value="adjust">Set Stok Manual (=)</option>
+      </select>
+      <label>Jumlah</label>
+      <input type="number" id="stock-amount" min="0" value="0">
+      <label>Catatan</label>
+      <input type="text" id="stock-note" placeholder="Contoh: Restok dari supplier">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-close="modal-stock">Batal</button>
+      <button class="btn btn-primary" id="btn-save-stock">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="modal-payment">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Pembayaran</h3>
+      <button class="modal-close" data-close="modal-payment">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pay-total-display">
+        <span>Total Bayar</span>
+        <span id="pay-total">Rp 0</span>
+      </div>
+      <label>Metode Pembayaran</label>
+      <div class="pay-methods">
+        <button class="pay-method-btn active" data-method="Tunai">💵 Tunai</button>
+        <button class="pay-method-btn" data-method="Transfer Bank">🏦 Transfer</button>
+        <button class="pay-method-btn" data-method="QRIS/E-Wallet">📱 QRIS</button>
+      </div>
+      <div id="cash-input-group">
+        <label>Uang Diterima</label>
+        <input type="number" id="pay-received" min="0" placeholder="0">
+        <div class="quick-cash" id="quick-cash"></div>
+        <div class="change-display">
+          <span>Kembalian</span>
+          <span id="pay-change">Rp 0</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-close="modal-payment">Batal</button>
+      <button class="btn btn-primary btn-lg" id="btn-confirm-payment">Selesaikan Transaksi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="modal-receipt">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Struk Transaksi</h3>
+      <button class="modal-close" data-close="modal-receipt">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="receipt-content" class="receipt"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-close="modal-receipt">Tutup</button>
+      <button class="btn btn-primary" id="btn-print-receipt">🖨 Cetak Struk</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="user-modal-title">Tambah User</h3>
+      <button class="modal-close" data-close="modal-user">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="user-id-edit">
+      <label>Nama Lengkap *</label>
+      <input type="text" id="user-fullname">
+      <label>Username *</label>
+      <input type="text" id="user-username">
+      <label>Password *</label>
+      <input type="password" id="user-password" placeholder="Kosongkan jika tidak diubah">
+      <label>Role *</label>
+      <select id="user-role-select">
+        <option value="kasir">Kasir</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-close="modal-user">Batal</button>
+      <button class="btn btn-primary" id="btn-save-user">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/pos.js"></script>
+<script src="js/inventory.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/receipt.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
